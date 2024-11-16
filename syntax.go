@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/charmbracelet/vhs/parser"
-	"github.com/charmbracelet/vhs/token"
+	"github.com/tetutaro/vhs/parser"
+	"github.com/tetutaro/vhs/token"
 )
 
 // Highlight syntax highlights a command for prettier printing.

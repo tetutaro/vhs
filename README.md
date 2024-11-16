@@ -4,7 +4,7 @@
   <img src="https://user-images.githubusercontent.com/42545625/198402537-12ca2f6c-0779-4eb8-a67c-8db9cb3df13c.png#gh-dark-mode-only" width="500" />
   <img src="https://user-images.githubusercontent.com/42545625/198402542-a305f669-a05a-4d91-b18b-ca76e72b655a.png#gh-light-mode-only" width="500" />
   <br>
-  <a href="https://github.com/charmbracelet/vhs/releases"><img src="https://img.shields.io/github/release/charmbracelet/vhs.svg" alt="Latest Release"></a>
+  <a href="https://github.com/tetutaro/vhs/releases"><img src="https://img.shields.io/github/release/tetutaro/vhs.svg" alt="Latest Release"></a>
   <a href="https://pkg.go.dev/github.com/charmbracelet/vhs?tab=doc"><img src="https://godoc.org/github.com/golang/gddo?status.svg" alt="Go Docs"></a>
   <a href="https://github.com/charmbracelet/vhs/actions"><img src="https://github.com/charmbracelet/vhs/workflows/build/badge.svg" alt="Build Status"></a>
 </p>
@@ -70,7 +70,7 @@ the `Output`) in the directory.
   <img width="600" alt="A GIF produced by the VHS code above" src="https://stuff.charm.sh/vhs/examples/demo.gif">
 </picture>
 
-For more examples see the [`examples/`](https://github.com/charmbracelet/vhs/tree/main/examples) directory.
+For more examples see the [`examples/`](https://github.com/tetutaro/vhs/tree/main/examples) directory.
 
 ## Installation
 
@@ -107,7 +107,7 @@ Or, download it:
 Or, just install it with `go`:
 
 ```sh
-go install github.com/charmbracelet/vhs@latest
+go install github.com/tetutaro/vhs@latest
 ```
 
 <details>
@@ -153,7 +153,7 @@ scoop install vhs
 
 </details>
 
-[releases]: https://github.com/charmbracelet/vhs/releases
+[releases]: https://github.com/tetutaro/vhs/releases
 
 ## Record Tapes
 

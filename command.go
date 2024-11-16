@@ -12,9 +12,9 @@ import (
 	"time"
 
 	"github.com/atotto/clipboard"
-	"github.com/charmbracelet/vhs/lexer"
-	"github.com/charmbracelet/vhs/parser"
-	"github.com/charmbracelet/vhs/token"
+	"github.com/tetutaro/vhs/lexer"
+	"github.com/tetutaro/vhs/parser"
+	"github.com/tetutaro/vhs/token"
 	"github.com/go-rod/rod/lib/input"
 	"github.com/mattn/go-runewidth"
 )

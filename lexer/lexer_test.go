@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/charmbracelet/vhs/token"
+	"github.com/tetutaro/vhs/token"
 )
 
 func TestNextToken(t *testing.T) {
