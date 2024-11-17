@@ -77,6 +77,7 @@ var keystrokeSymbolOverrides = map[input.Key]string{
 	input.Enter:        "⏎",
 	input.Escape:       "↖",
 	input.Tab:          "⇥",
+	input.Quote:        "\u2019",
 }
 
 func keyToDisplay(key input.Key) string {

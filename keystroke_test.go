@@ -85,6 +85,11 @@ func TestKeyStrokeEventsKeyToDisplay(t *testing.T) {
 			key:      input.Backspace,
 			expected: "⌫",
 		},
+		{
+			name:     "single quote",
+			key:      input.Quote,
+			expected: "\u2019",
+		},
 	}
 
 	for _, tc := range cases {
