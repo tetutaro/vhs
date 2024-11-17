@@ -3,6 +3,7 @@ package main
 import (
 	"sync"
 	"time"
+	"strings"
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/input"
@@ -119,6 +120,9 @@ func (k *KeyStrokeEvents) Push(display string) {
 		return
 	}
 
+	if strings.HasSuffix(k.display, "⏎") {
+		k.display = ""
+	}
 	k.display += display
 	// Keep k.display @ 20 max.
 	// Anymore than that is probably overkill, and we don't want to run into
