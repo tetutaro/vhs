@@ -83,7 +83,7 @@ func TestKeyStrokeEventsKeyToDisplay(t *testing.T) {
 		{
 			name:     "symbol override",
 			key:      input.Backspace,
-			expected: "⌫",
+			expected: "[BS]",
 		},
 		{
 			name:     "single quote",
