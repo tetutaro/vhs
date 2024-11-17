@@ -172,6 +172,76 @@ func (fb *FilterComplexBuilder) WithMarginFill(marginStream int) *FilterComplexB
 	return fb
 }
 
+// WithKeyStrokes adds key stroke drawtext options to the ffmpeg filter_complex.
+func (fb *FilterComplexBuilder) WithKeyStrokes(opts VideoOptions) *FilterComplexBuilder {
+	var (
+		defaultFontFamily = "monospace"
+		horizontalCenter  = "(w-text_w)/2"
+		verticalCenter    = fmt.Sprintf("h-text_h-%d", opts.Style.Margin+opts.Style.Padding)
+	)
+	events := opts.KeyStrokeOverlay.Events
+
+	// When we are dealing with the last event, things can actually get very
+	// subtly tricky.
+	// If the last keystroke event is _very_ close to the end of the recording
+	// (e.g. the last line of the .tape is Type), then there is a chance that
+	// this keystroke draw event gets effectively dropped. That is because the
+	// gte() clause here may have a timestamp that is exactly equal to or
+	// slightly greater than the actual length of the recording itself. In order
+	// to fix this, we actually want to "pad" the recording a little extra in
+	// this case.  While we could simply unconditionally record a few more
+	// seconds at the end of every vhs recording, this is actually not a
+	// generalizable solution for a dynamic typing speed, where we would
+	// proportionally require _more_ extra frames to make sure to not drop any
+	// keystrokes.
+	// Now, the condition in which we need to do this corrective action is if
+	// the last event is recorded after the duration of the recording with a
+	// tolerance of 100 ms:
+	if overflow := events[len(events)-1].WhenMS - opts.KeyStrokeOverlay.Duration.Milliseconds(); overflow > -100 && overflow < 100 {
+		// If so, extend the recording by a window twice the length of the
+		// typing speed. This should give ample time for the last keystroke
+		// event to be properly rendered.
+		fb.filterComplex.WriteString(fmt.Sprintf(";\n[%s]tpad=stop_mode=clone:stop_duration=%f[endpad]\n", fb.prevStageName, opts.KeyStrokeOverlay.TypingSpeed.Seconds()*2))
+		fb.prevStageName = "endpad"
+	}
+
+	prevStageName := fb.prevStageName
+	for i := range events {
+		event := events[i]
+		fb.filterComplex.WriteString(";")
+		stageName := fmt.Sprintf("keystrokeOverlay%d", i)
+
+		// When setting the enable conditions, we have to handle the very last
+		// event specially. It technically has no 'end' so we set it to render
+		// until the end of the video.
+		enableCondition := fmt.Sprintf("gte(t,%f)", float64(event.WhenMS)/1000)
+		if i < len(events)-1 {
+			enableCondition = fmt.Sprintf("between(t,%f,%f)", float64(events[i].WhenMS)/1000, float64(events[i+1].WhenMS)/1000)
+		}
+		fb.filterComplex.WriteString(
+			fmt.Sprintf(`
+			[%s]drawtext=font=%s:text='%s':fontcolor=%s:fontsize=%d:x='%s':y='%s':enable='%s'[%s]
+			`,
+				prevStageName,
+				defaultFontFamily,
+				events[i].Display,
+				opts.KeyStrokeOverlay.Color,
+				defaultFontSize,
+				horizontalCenter,
+				verticalCenter,
+				enableCondition,
+				stageName,
+			),
+		)
+		prevStageName = stageName
+	}
+
+	// At the end of the loop, the previous stage name is now transfered to the filter complex builder's
+	// state for use in subsequent filters.
+	fb.prevStageName = prevStageName
+	return fb
+}
+
 // WithGIF adds gif options to ffmepg filter_complex.
 func (fb *FilterComplexBuilder) WithGIF() *FilterComplexBuilder {
 	fb.filterComplex.WriteString(";")

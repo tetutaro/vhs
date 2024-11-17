@@ -23,7 +23,7 @@ import (
 type VHS struct {
 	Options      *Options
 	Errors       []error
-	Page         *rod.Page
+	Page         *Page
 	browser      *rod.Browser
 	TextCanvas   *rod.Element
 	CursorCanvas *rod.Element
@@ -149,7 +149,7 @@ func (vhs *VHS) Start() error {
 	}
 
 	vhs.browser = browser
-	vhs.Page = page
+	vhs.Page = NewPage(page)
 	vhs.close = vhs.browser.Close
 	vhs.started = true
 	return nil
@@ -195,6 +195,8 @@ const cleanupWaitTime = 100 * time.Millisecond
 // Terminate cleans up a VHS instance and terminates the go-rod browser and ttyd
 // processes.
 func (vhs *VHS) terminate() error {
+	// Signal the end of all keystroke events.
+	vhs.Page.KeyStrokeEvents.End()
 	// Give some time for any commands executed (such as `rm`) to finish.
 	//
 	// If a user runs a long running command, they must sleep for the required time
@@ -221,6 +223,9 @@ func (vhs *VHS) Render() error {
 	if err := vhs.ApplyLoopOffset(); err != nil {
 		return err
 	}
+
+	vhs.Options.Video.KeyStrokeOverlay.Events = vhs.Page.KeyStrokeEvents.events
+	vhs.Options.Video.KeyStrokeOverlay.Duration = vhs.Page.KeyStrokeEvents.duration
 
 	// Generate the video(s) with the frames.
 	var cmds []*exec.Cmd
@@ -322,7 +327,8 @@ func (vhs *VHS) Record(ctx context.Context) <-chan error {
 
 	go func() {
 		counter := 0
-		start := time.Now()
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
 		for {
 			select {
 			case <-ctx.Done():
@@ -335,10 +341,7 @@ func (vhs *VHS) Record(ctx context.Context) <-chan error {
 				close(ch)
 				return
 
-			case <-time.After(interval - time.Since(start)):
-				// record last attempt
-				start = time.Now()
-
+			case <-ticker.C:
 				if !vhs.recording {
 					continue
 				}

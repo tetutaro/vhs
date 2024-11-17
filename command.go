@@ -352,7 +352,7 @@ func ExecuteType(c parser.Command, v *VHS) error {
 				return fmt.Errorf("failed to type key %c: %w", r, err)
 			}
 		} else {
-			err := v.Page.MustElement("textarea").Input(string(r))
+			err := v.Page.Keyboard.Input(string(r))
 			if err != nil {
 				return fmt.Errorf("failed to input text: %w", err)
 			}
@@ -407,7 +407,7 @@ func ExecutePaste(_ parser.Command, v *VHS) error {
 				return fmt.Errorf("failed to type key %c: %w", r, err)
 			}
 		} else {
-			err = v.Page.MustElement("textarea").Input(string(r))
+			err = v.Page.Keyboard.Input(string(r))
 			if err != nil {
 				return fmt.Errorf("failed to input text: %w", err)
 			}
@@ -430,6 +430,7 @@ var Settings = map[string]CommandFunc{
 	"Padding":       ExecuteSetPadding,
 	"Theme":         ExecuteSetTheme,
 	"TypingSpeed":   ExecuteSetTypingSpeed,
+	"KeyStrokes":    ExecuteSetKeyStrokes,
 	"Width":         ExecuteSetWidth,
 	"Shell":         ExecuteSetShell,
 	"LoopOffset":    ExecuteLoopOffset,
@@ -577,6 +578,13 @@ func ExecuteSetTheme(c parser.Command, v *VHS) error {
 	v.Options.Video.Style.BackgroundColor = v.Options.Theme.Background
 	v.Options.Video.Style.WindowBarColor = v.Options.Theme.Background
 	v.Options.Video.Style.WindowTitleColor = v.Options.Theme.Foreground
+	// The intuitive behavior is to have keystroke overlay inherit from the
+	// foreground color. One key benefit of this behavior is that you won't have
+	// issues where e.g. a light theme makes a default white-value keystroke
+	// overlay be hard to read. If it does, then the theme is likely
+	// fundamentally 'broken' since the text you type at the shell will
+	// similarly be very hard to read.
+	v.Options.Video.KeyStrokeOverlay.Color = v.Options.Theme.Foreground
 
 	return nil
 }
@@ -589,7 +597,19 @@ func ExecuteSetTypingSpeed(c parser.Command, v *VHS) error {
 	}
 
 	v.Options.TypingSpeed = typingSpeed
+	v.Options.Video.KeyStrokeOverlay.TypingSpeed = v.Options.TypingSpeed
 	return nil
+}
+
+// ExecuteSetKeyStrokes enables or disables keystroke overlay recording.
+func ExecuteSetKeyStrokes(c parser.Command, v *VHS) error {
+	switch c.Args {
+	case "Hide":
+		v.Page.KeyStrokeEvents.Disable()
+	case "Show":
+		v.Page.KeyStrokeEvents.Enable()
+	}
+    return nil
 }
 
 // ExecuteSetWaitTimeout applies the default wait timeout on the vhs.

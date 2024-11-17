@@ -88,7 +88,8 @@ func TestParserErrors(t *testing.T) {
 Type Enter
 Type "echo 'Hello, World!'" Enter
 Foo
-Sleep Bar`
+Sleep Bar
+Set KeyStrokes imsowrong`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -100,15 +101,22 @@ Sleep Bar`
 		" 4:1  │ Invalid command: Foo",
 		" 5:1  │ Expected time after Sleep",
 		" 5:7  │ Invalid command: Bar",
+		" 6:16 │ Expected Hide or Show after KeyStrokes",
+		" 6:16 │ Invalid command: imsowrong",
+	}
+
+	actualErrorMessages := make([]string, len(p.errors))
+	for i, err := range p.errors {
+		actualErrorMessages[i] = err.String()
 	}
 
 	if len(p.errors) != len(expectedErrors) {
-		t.Fatalf("Expected %d errors, got %d", len(expectedErrors), len(p.errors))
+		t.Fatalf("Expected %d errors, got %d (expected:\n%s\ngot:\n%s)", len(expectedErrors), len(p.errors), strings.Join(expectedErrors, "\n"), strings.Join(actualErrorMessages, "\n"))
 	}
 
-	for i, err := range p.errors {
-		if err.String() != expectedErrors[i] {
-			t.Errorf("Expected error %d to be [%s], got (%s)", i, expectedErrors[i], err)
+	for i, errMsg := range actualErrorMessages {
+		if errMsg != expectedErrors[i] {
+			t.Errorf("Expected error %d to be [%s], got (%s)", i, expectedErrors[i], errMsg)
 		}
 	}
 }
@@ -136,6 +144,8 @@ func TestParseTapeFile(t *testing.T) {
 		{Type: token.SET, Options: "Framerate", Args: "60"},
 		{Type: token.SET, Options: "PlaybackSpeed", Args: "2"},
 		{Type: token.SET, Options: "TypingSpeed", Args: ".1s"},
+		{Type: token.SET, Options: "KeyStrokes", Args: "Hide"},
+		{Type: token.SET, Options: "KeyStrokes", Args: "Show"},
 		{Type: token.SET, Options: "LoopOffset", Args: "60.4%"},
 		{Type: token.SET, Options: "LoopOffset", Args: "20.99%"},
 		{Type: token.SET, Options: "CursorBlink", Args: "false"},
