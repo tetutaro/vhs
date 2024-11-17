@@ -117,6 +117,11 @@ func (k *KeyStrokeEvents) Push(display string) {
 	// events correctly, and the keystroke overlay may be re-enabled later in
 	// the recording.
 	if !k.enabled {
+		if k.display != "" {
+			k.display = ""
+			event := KeyStrokeEvent{Display: k.display, WhenMS: time.Now().Sub(k.startTime).Milliseconds()}
+			k.events = append(k.events, event)
+		}
 		return
 	}
 
